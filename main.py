@@ -3,6 +3,7 @@ import glob
 import json
 import threading
 import tkinter as tk
+import csv
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, open_dir
 from whoosh.qparser import QueryParser
@@ -17,7 +18,6 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import io
 import pickle
-import csv
 
 # Function to extract text from PDF
 def extract_text_from_pdf(file_path):
@@ -190,3 +190,4 @@ class Application(tk.Frame):
 root = tk.Tk()
 app = Application(master=root)
 app.mainloop()
+
