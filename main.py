@@ -17,6 +17,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import io
 import pickle
+import csv
 
 # Function to extract text from PDF
 def extract_text_from_pdf(file_path):
@@ -36,6 +37,18 @@ def extract_text_from_doc(file_path):
 def extract_text_from_image(file_path):
     img = Image.open(file_path)
     return pytesseract.image_to_string(img)
+
+# Function to extract text from JSON
+def extract_text_from_json(file_path):
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    return json.dumps(data)  # converts JSON data to string
+
+# Function to extract text from CSV
+def extract_text_from_csv(file_path):
+    with open(file_path, 'r') as f:
+        reader = csv.reader(f)
+        return ' '.join([' '.join(row) for row in reader])  # converts each row to a string and joins all rows
 
 # Google Drive API settings
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -70,6 +83,10 @@ def extract_text_from_drive_file(file):
         return extract_text_from_doc(io.BytesIO(fh.getvalue()))
     elif file['mimeType'] == 'image/jpeg' or file['mimeType'] == 'image/png':
         return extract_text_from_image(io.BytesIO(fh.getvalue()))
+    elif file['mimeType'] == 'application/json':
+        return extract_text_from_json(io.BytesIO(fh.getvalue()))
+    elif file['mimeType'] == 'text/csv':
+        return extract_text_from_csv(io.BytesIO(fh.getvalue()))
 
 # Function to add file to index
 def add_to_index(writer, path, link, text):
@@ -92,14 +109,17 @@ def index_local():
 
     writer = ix.writer()
     for directory in local_directories:
-        for file_path
-        in glob.glob(directory + '/**', recursive=True):
+        for file_path in glob.glob(directory + '/**', recursive=True):
             if file_path.endswith('.pdf'):
                 text = extract_text_from_pdf(file_path)
             elif file_path.endswith('.doc') or file_path.endswith('.docx'):
                 text = extract_text_from_doc(file_path)
             elif file_path.endswith('.jpg') or file_path.endswith('.png'):
                 text = extract_text_from_image(file_path)
+            elif file_path.endswith('.json'):
+                text = extract_text_from_json(file_path)
+            elif file_path.endswith('.csv'):
+                text = extract_text_from_csv(file_path)
             else:
                 continue
 
